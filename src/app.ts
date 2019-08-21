@@ -1,21 +1,22 @@
 import "phaser";
-import { WelcomeScene } from "./welcomeScene";
-import { GameScene } from "./gameScene";
-import { ScoreScene } from "./scoreScene";
+import { WelcomeScene } from "./scenes/WelcomeScene";
+import { FieldScene } from "./scenes/FieldScene";
+import { GameScene } from "./scenes/GameScene";
+import { ScoreScene } from "./scenes/ScoreScene";
 
 const config: GameConfig = {
-  title: "Starfall",
+  title: "Ebonhaven",
   width: 800,
   height: 600,
   parent: "game",
-  scene: [WelcomeScene, GameScene, ScoreScene],
+  scene: [ WelcomeScene, FieldScene, GameScene, ScoreScene ],
   physics: {
     default: "arcade",
     arcade: {
-      debug: false
+      debug: true
     }
   },
-  backgroundColor: "#18216D"
+  backgroundColor: "#000"
 };
 
 export class StarfallGame extends Phaser.Game {

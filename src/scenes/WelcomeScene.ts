@@ -11,16 +11,16 @@ export class WelcomeScene extends Phaser.Scene {
   }
 
   create(): void {
-    var titleText: string = "Starfall";
+    var titleText: string = "Ebonhaven";
     this.title = this.add.text(150, 200, titleText,
-      { font: '128px Arial Bold', fill: '#FBFBAC' });
+      { font: '86px Arial Bold', fill: '#FFF' });
 
     var hintText: string = "Click to start";
     this.hint = this.add.text(300, 350, hintText,
-      { font: '24px Arial Bold', fill: '#FBFBAC' });
+      { font: '24px Arial Bold', fill: '#FFF' });
 
     this.input.on('pointerdown', function (/*pointer*/) {
-      this.scene.start("GameScene");
+      this.scene.start("FieldScene");
     }, this);
   }
 };
