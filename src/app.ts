@@ -10,6 +10,9 @@ const config: GameConfig = {
   height: 600,
   parent: "game",
   scene: [ WelcomeScene, FieldScene, GameScene, ScoreScene ],
+  render: {
+    pixelArt: true
+  },
   physics: {
     default: "arcade",
     arcade: {
