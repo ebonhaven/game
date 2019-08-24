@@ -1,5 +1,7 @@
 import "phaser";
-import { WelcomeScene } from "./scenes/WelcomeScene";
+import { LoginScene } from "./scenes/LoginScene";
+import { CharacterSelectScene } from "./scenes/CharacterSelectScene";
+import { NewCharacterScene } from "./scenes/NewCharacterScene";
 import { FieldScene } from "./scenes/FieldScene";
 import { GameScene } from "./scenes/GameScene";
 import { ScoreScene } from "./scenes/ScoreScene";
@@ -9,9 +11,12 @@ const config: GameConfig = {
   width: 800,
   height: 600,
   parent: "game",
-  scene: [ WelcomeScene, FieldScene, GameScene, ScoreScene ],
+  scene: [ LoginScene, CharacterSelectScene, NewCharacterScene, FieldScene, GameScene, ScoreScene ],
   render: {
     pixelArt: true
+  },
+  dom: {
+    createContainer: true
   },
   physics: {
     default: "arcade",

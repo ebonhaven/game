@@ -1,5 +1,6 @@
 import "phaser";
 import * as EasyStar from 'easystarjs';
+import { Scatter } from '../lib/Scatter';
 
 export class FieldScene extends Phaser.Scene {
 
@@ -11,11 +12,15 @@ export class FieldScene extends Phaser.Scene {
   player;
   anims;
   isWalking = false;
+  network;
+  rpc;
+  scatter;
 
   constructor() {
     super({
       key: "FieldScene"
     });
+    this.scatter = new Scatter();
   }
 
   preload(): void {
@@ -31,13 +36,14 @@ export class FieldScene extends Phaser.Scene {
 
 
     this.map = this.make.tilemap({ key: "map" });
-    const tileset = this.map.addTilesetImage("tuxmon-sample-32px", "tiles");
-    console.log(this.map);
+    const tileset = this.map.addTilesetImage("tuxmon-sample-32px", "tiles")
+    
 
     const bg = this.map.createStaticLayer("Background", tileset, 0, 0);
     const below = this.map.createStaticLayer("Below Player", tileset, 0, 0);
     const above = this.map.createStaticLayer("Above Player", tileset, 0, 0);
     const gridTiles = this.map.createStaticLayer("Walkable", tileset, 0, 0);
+    console.log(this.map);
     above.setDepth(20);
 
     let grid = [];
@@ -55,6 +61,7 @@ export class FieldScene extends Phaser.Scene {
       continue;
     }
     this.finder.setAcceptableTiles(acceptableTiles);
+    this.finder.enableDiagonals();
 
     this.player = this.add.sprite((this.map.widthInPixels / 2) - (this.map.tileWidth / 2), this.map.heightInPixels / 2, null);
     this.player.setScale(2.25, 2.25);
@@ -103,6 +110,13 @@ export class FieldScene extends Phaser.Scene {
     this.camera.startFollow(this.player, true, 0.25, 0.25);
     console.log(this.camera);
     this.input.on("pointerup", this.handleClick, this );
+
+    const generateButton = this.add.text(100, 100, "Generate Mapdata", { fill: '#0f0' });
+    generateButton.setInteractive();
+    generateButton.on('pointerdown', () => {
+      console.log('clicked button!');
+      this.generateMapdata();
+    });
   }
 
   update(time, delta): void {
@@ -115,13 +129,10 @@ export class FieldScene extends Phaser.Scene {
     let pointerTileY = this.map.worldToTileY(worldPoint['y']);
     this.marker.x = this.map.tileToWorldX(pointerTileX);
     this.marker.y = this.map.tileToWorldY(pointerTileY);
-    let fromX = Math.floor(this.player.x / this.map.tileWidth );
-    let fromY = Math.floor(this.player.y / this.map.tileHeight );
     
     this.marker.setVisible(
       this.isWalking == false &&
-      this.checkCollision(pointerTileX, pointerTileY) &&
-      this.distanceWithinMovementRadius(fromX, fromY, pointerTileX, pointerTileY) == true
+      this.checkCollision(pointerTileX, pointerTileY)
     );
 
   }
@@ -129,22 +140,30 @@ export class FieldScene extends Phaser.Scene {
 
 
   handleClick(pointer) {
-    console.log('clicked!');
-    // console.log(this.camera);
     let x = Math.floor(this.camera.scrollX + pointer.x);
     let y = Math.floor(this.camera.scrollY + pointer.y);
     let toX = Math.floor(x / this.map.tileWidth);
-    let toY = Math.floor(y/ this.map.tileHeight);
+    let toY = Math.floor(y / this.map.tileHeight);
     // console.log(`Player: ${this.player.x}, ${this.player.y}`);
-    let fromX = Math.floor(this.player.x / this.map.tileWidth );
-    let fromY = Math.floor(this.player.y / this.map.tileHeight );
+    let fromX = Math.floor(this.player.x / this.map.tileWidth);
+    let fromY = Math.floor(this.player.y / this.map.tileHeight);
     // console.log(`Going from ${fromX}, ${fromY} to ${toX}, ${toY}`);
 
 
-    if (!this.isWalking && this.distanceWithinMovementRadius(fromX, fromY, toX, toY)) {
+    if (!this.isWalking) {
       this.finder.findPath(fromX, fromY, toX, toY, (path) => {
         console.log(path);
         if (path !== null) {
+          if (!this.distanceWithinMovementRadius(fromX, fromY, toX, toY)) {
+            let sliceAt;
+            for (let i = 0; i < path.length; i ++) {
+              if (!this.distanceWithinMovementRadius(fromX, fromY, path[i].x, path[i].y)) {
+                sliceAt = i;
+                break;
+              }
+            }
+            path = path.slice(0, sliceAt + 1);
+          }
           this.moveCharacter(path);
         }
       });
@@ -189,5 +208,20 @@ export class FieldScene extends Phaser.Scene {
   private getTileId(x, y) {
     let tile = this.map.getTileAt(x, y, false, "Walkable");
     return (tile ? tile.index : 0);
+  }
+
+  private generateMapdata() {
+    let tiles = [];
+    const gridData = this.map.layers.filter(l => l.name == "Walkable")[0].data;
+    gridData.forEach((row) => {
+      row.forEach((col) => {
+        let isWalkable = col.index !== -1;
+        tiles.push({
+          coordinates: { x: col.x, y: col.y },
+          attributes: JSON.stringify({ walkable: isWalkable })
+        });
+      });
+    });
+    console.log(JSON.stringify(tiles));
   }
 };
