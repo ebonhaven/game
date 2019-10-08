@@ -11,14 +11,16 @@ export class LoginScene extends Phaser.Scene {
     super({
       key: "LoginScene"
     });
-    this.scatter = new Scatter();
   }
 
   create(): void {
+
+    this.scatter = Scatter.getInstance();
+
     console.log('creating login scene');
     var titleText: string = "Ebonhaven";
-    this.title = this.add.text(150, 200, titleText,
-      { font: '86px Arial Bold', fill: '#FFF' });
+    this.title = this.add.text(125, 200, titleText,
+      { font: '86px Arial Black', fill: '#FFF' });
 
     var loginText: string = "Login";
     this.loginButton = this.add.text(300, 350, loginText,
@@ -29,20 +31,20 @@ export class LoginScene extends Phaser.Scene {
       { font: '24px Arial Bold', fill: '#FFF' });
 
     this.loginButton.setInteractive();
-    this.scatter.events.on('loggedin', this.login, this);
-    this.loginButton.on('pointerdown', () => {
+    this.scatter.events.once('loggedin', this.login, this);
+    this.loginButton.once('pointerdown', () => {
       this.scatter.login();
-    });
+    }, this);
 
     this.logoutButton.setInteractive();
-    this.logoutButton.on('pointerdown', () => {
+    this.logoutButton.once('pointerdown', () => {
       this.scatter.logout();
-    });
+    }, this);
   }
 
   login(account) {
     this.registry.set('account', account);
-    this.scene.switch("CharacterSelectScene");
+    this.scene.start("CharacterSelectScene");
   }
 
 };

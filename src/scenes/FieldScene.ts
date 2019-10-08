@@ -20,7 +20,6 @@ export class FieldScene extends Phaser.Scene {
     super({
       key: "FieldScene"
     });
-    this.scatter = new Scatter();
   }
 
   preload(): void {
@@ -31,6 +30,7 @@ export class FieldScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.scatter = Scatter.getInstance(); 
     console.log('Hello from FieldScene');
     this.finder = new EasyStar.js();
 
@@ -174,7 +174,7 @@ export class FieldScene extends Phaser.Scene {
   moveCharacter(path) {
     let tweens = [];
     let total = 0;
-    let perPathDuration = 100;
+    let perPathDuration = 180;
     for (let i = 0; i < path.length - 1; i++) {
       let ex = path[i+1].x;
       let ey = path[i+1].y;

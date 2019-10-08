@@ -2,13 +2,14 @@ import ScatterJS from '@scatterjs/core';
 import ScatterEOS from '@scatterjs/eosjs2';
 import { JsonRpc, Api } from 'eosjs';
 
-
-
 export class Scatter {
   network;
   rpc;
   public events;
-  constructor() {
+  isAccountRefreshing = false;
+  isCharactersRefreshing = false;
+  private static instance: Scatter;
+  private constructor() {
     this.network = ScatterJS.Network.fromJson({
       blockchain: 'eos',
       chainId: 'cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f',
@@ -19,6 +20,13 @@ export class Scatter {
     ScatterJS.plugins( new ScatterEOS() );
     this.rpc = new JsonRpc(this.network.fullhost());
     this.events = new Phaser.Events.EventEmitter();
+  }
+
+  static getInstance() {
+    if (!Scatter.instance) {
+      Scatter.instance = new Scatter();
+    }
+    return Scatter.instance;
   }
 
   login() {
@@ -41,40 +49,73 @@ export class Scatter {
     });
   }
 
+  async getAccount( name ) {
+    if (!this.isAccountRefreshing) {
+      this.isAccountRefreshing = true;
+      this.makeResourceCall('accountrefreshed', { scope: name, table: 'accounts', limit: 1 });
+    }
+    this.isAccountRefreshing = false;
+  }
+
   async getCharacters( name ) {
-    console.log('Getting characters');
-    const result = await this.rpc.get_table_rows({
+    this.makeResourceCall('charactersrefreshed', { scope: name, table: 'characters' });
+  }
+
+  async makeResourceCall( event, options ) {
+    let defaults = {
       json: true,
       code: 'ebonhavencom',
-      scope: name,
-      table: 'characters',
-      limit: 5,
+      scope: 'ebonhavencom',
+      table: 'accounts',
+      limit: 5
+    };
+    let merged = Object.assign(defaults, options);
+    let result = await this.rpc.get_table_rows({
+      json: merged.json,
+      code: merged.code,
+      scope: merged.scope,
+      table: merged.table,
+      limit: merged.limit,
     });
-    return result.rows;
+    this.events.emit(event, result);
   }
 
   newCharacter( account, data ) {
+    this.makeTransaction('newcharacter', account, data, 'charactercreated', 'charactererror');
+  }
+
+  delCharacter( account, data ) {
+    this.makeTransaction('delcharacter', account, data, 'characterdeleted', 'charactererror');
+  }
+
+  makeTransaction( action, auth, data, successEvent, errorEvent, options = {} ) {
+    let defaults = {
+      blocksBehind: 3,
+      expireSeconds: 30
+    };
+    let merged = Object.assign(defaults, options);
     ScatterJS.connect('Ebonhaven').then(connected => {
-      if (!connected) { return console.error('no scatter'); }
+      if (!connected) { return console.error('No Scatter'); }
       const eos = ScatterJS.eos(this.network, Api, {rpc: this.rpc});
       eos.transact({
         actions: [{
           account: "ebonhavencom",
-          name: "newcharacter",
+          name: action,
           authorization: [{
-            actor: account.name,
-            permission: account.authority
+            actor: auth.name,
+            permission: auth.authority
           }],
           data: data
         }]
       }, {
-        blocksBehind: 3,
-        expireSeconds: 30
+        blocksBehind: merged.blocksBehind,
+        expireSeconds: merged.expireSeconds
       }).then((res) => {
         console.log("Success: ", res);
-        this.events.emit("charactercreated");
+        this.events.emit(successEvent);
       }).catch((err) => {
         console.error("Error: ", err);
+        this.events.emit(errorEvent);
       })
     });
   }
