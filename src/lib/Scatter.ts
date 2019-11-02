@@ -50,18 +50,14 @@ export class Scatter {
   }
 
   async getAccount( name ) {
-    if (!this.isAccountRefreshing) {
-      this.isAccountRefreshing = true;
-      this.makeResourceCall('accountrefreshed', { scope: name, table: 'accounts', limit: 1 });
-    }
-    this.isAccountRefreshing = false;
+    return this.makeResourceCall({ scope: name, table: 'accounts', limit: 1 });
   }
 
   async getCharacters( name ) {
-    this.makeResourceCall('charactersrefreshed', { scope: name, table: 'characters' });
+    return this.makeResourceCall({ scope: name, table: 'characters' });
   }
 
-  async makeResourceCall( event, options ) {
+  async makeResourceCall( options ) {
     let defaults = {
       json: true,
       code: 'ebonhavencom',
@@ -77,7 +73,7 @@ export class Scatter {
       table: merged.table,
       limit: merged.limit,
     });
-    this.events.emit(event, result);
+    return result;
   }
 
   newCharacter( account, data ) {
@@ -86,6 +82,10 @@ export class Scatter {
 
   delCharacter( account, data ) {
     this.makeTransaction('delcharacter', account, data, 'characterdeleted', 'charactererror');
+  }
+
+  move( account, data ) {
+    this.makeTransaction('move', account, data, 'movesuccess', 'moveerror');
   }
 
   makeTransaction( action, auth, data, successEvent, errorEvent, options = {} ) {

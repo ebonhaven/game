@@ -20,15 +20,15 @@ export class LoginScene extends Phaser.Scene {
     console.log('creating login scene');
     var titleText: string = "Ebonhaven";
     this.title = this.add.text(125, 200, titleText,
-      { font: '86px Arial Black', fill: '#FFF' });
+      { fontFamily: '"Press Start 2P"', fontSize: '48px', fill: '#FFF' });
 
     var loginText: string = "Login";
     this.loginButton = this.add.text(300, 350, loginText,
-      { font: '24px Arial Bold', fill: '#FFF' });
+      { fontFamily: '"Press Start 2P"', fontSize: '24px', fill: '#FFF' });
 
     var logoutText: string = "Logout";
     this.logoutButton = this.add.text(300, 375, logoutText,
-      { font: '24px Arial Bold', fill: '#FFF' });
+      { fontFamily: '"Press Start 2P"', fontSize: '24px', fill: '#FFF' });
 
     this.loginButton.setInteractive();
     this.scatter.events.once('loggedin', this.login, this);

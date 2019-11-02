@@ -22,10 +22,11 @@ export class NewCharacterScene extends Phaser.Scene {
     element.on('click', (evt) => {
       let account = this.registry.get("account");
       if (evt.target.name == "submit") {
+        let gender = Array.prototype.slice.call(document.getElementsByName("gender")).filter((e) => e.checked)[0];
         let data = {
           user: account.name,
           character_name: element.getChildByName("character-name")["value"],
-          gender: element.getChildByName("gender")["value"],
+          gender: gender.value,
           race: element.getChildByName("race")["value"],
           profession: element.getChildByName("profession")["value"]
         }

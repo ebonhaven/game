@@ -4,6 +4,7 @@ import { Scatter } from '../lib/Scatter';
 
 export class FieldScene extends Phaser.Scene {
 
+  character;
   controls;
   map;
   marker;
@@ -15,6 +16,7 @@ export class FieldScene extends Phaser.Scene {
   network;
   rpc;
   scatter;
+  currentPath;
 
   constructor() {
     super({
@@ -34,6 +36,7 @@ export class FieldScene extends Phaser.Scene {
     console.log('Hello from FieldScene');
     this.finder = new EasyStar.js();
 
+    this.character = this.registry.values.characters[this.registry.values.activeCharacterIndex];
 
     this.map = this.make.tilemap({ key: "map" });
     const tileset = this.map.addTilesetImage("tuxmon-sample-32px", "tiles")
@@ -63,7 +66,11 @@ export class FieldScene extends Phaser.Scene {
     this.finder.setAcceptableTiles(acceptableTiles);
     this.finder.enableDiagonals();
 
-    this.player = this.add.sprite((this.map.widthInPixels / 2) - (this.map.tileWidth / 2), this.map.heightInPixels / 2, null);
+    let pos = this.map.getTileAt(this.character.position.x, this.character.position.y, false, "Walkable");
+    console.log(`POS: `);
+    console.log(pos);
+
+    this.player = this.add.sprite(pos.pixelX + (pos.width / 2), pos.pixelY + (pos.height / 4), null);
     this.player.setScale(2.25, 2.25);
     this.player.setDepth(11);
     [
@@ -95,6 +102,7 @@ export class FieldScene extends Phaser.Scene {
     this.marker.strokeRoundedRect(1, 1, this.map.tileWidth - 2, this.map.tileHeight - 2, 3);
 
     this.camera = this.cameras.main;
+    // this.camera.setZoom(2);
     
     const cursors = this.input.keyboard.createCursorKeys();
     this.controls = new Phaser.Cameras.Controls.FixedKeyControl({
@@ -117,6 +125,12 @@ export class FieldScene extends Phaser.Scene {
       console.log('clicked button!');
       this.generateMapdata();
     });
+
+    this.scatter.events.on("movesuccess", (result) => {
+      console.log("Move succeeded");
+      this.moveCharacter(this.currentPath);
+      this.currentPath = null;
+    });
   }
 
   update(time, delta): void {
@@ -137,8 +151,6 @@ export class FieldScene extends Phaser.Scene {
 
   }
 
-
-
   handleClick(pointer) {
     let x = Math.floor(this.camera.scrollX + pointer.x);
     let y = Math.floor(this.camera.scrollY + pointer.y);
@@ -148,7 +160,6 @@ export class FieldScene extends Phaser.Scene {
     let fromX = Math.floor(this.player.x / this.map.tileWidth);
     let fromY = Math.floor(this.player.y / this.map.tileHeight);
     // console.log(`Going from ${fromX}, ${fromY} to ${toX}, ${toY}`);
-
 
     if (!this.isWalking) {
       this.finder.findPath(fromX, fromY, toX, toY, (path) => {
@@ -164,11 +175,30 @@ export class FieldScene extends Phaser.Scene {
             }
             path = path.slice(0, sliceAt + 1);
           }
-          this.moveCharacter(path);
+          console.log(path);
+          this.currentPath = path;
+          this.sendMoveTx(path[path.length - 1]);
+          //this.moveCharacter(path);
         }
       });
       this.finder.calculate();
     }
+  }
+
+ async sendMoveTx(endPosition) {
+    console.log(endPosition)
+    let data = {
+      user: this.registry.values.account.name,
+      character_id: this.character.character_id,
+      new_position: {
+        orientation: 0,
+        world_zone_id: parseInt(this.character.position.world_zone_id),
+        x: endPosition.x,
+        y: endPosition.y
+      }
+    };
+    console.log(data);
+    await this.scatter.move(this.registry.get("account"), data);
   }
 
   moveCharacter(path) {
@@ -195,7 +225,7 @@ export class FieldScene extends Phaser.Scene {
     }, total);
   };
 
-  private distanceWithinMovementRadius(fromX, fromY, toX, toY, radius = 3.5) {
+  private distanceWithinMovementRadius(fromX, fromY, toX, toY, radius = 2.5) {
     let distance = Phaser.Math.Distance.Between(fromX, fromY, toX, toY);
     return (distance <= radius ? true : false);
   }
