@@ -1,9 +1,11 @@
+import { ScatterProvider } from './../lib/providers/ScatterProvider';
+import { PROVIDERS } from './../lib/providers/Provider';
 import "phaser";
 import { Provider } from '../lib/providers/Provider';
 
 export class LoginScene extends Phaser.Scene {
   title: Phaser.GameObjects.Text;
-  loginButton: Phaser.GameObjects.Text;
+  scatterBtn: Phaser.GameObjects.Text;
   logoutButton: Phaser.GameObjects.Text;
   privKeyBtn: Phaser.GameObjects.Text;
   provider;
@@ -20,7 +22,7 @@ export class LoginScene extends Phaser.Scene {
     this.title = this.add.text(125, 200, `Ebonhaven`,
       { fontFamily: '"Press Start 2P"', fontSize: '48px', fill: '#FFF' });
 
-    this.loginButton = this.add.text(125, 325, `Login with Scatter`,
+    this.scatterBtn = this.add.text(125, 325, `Login with Scatter`,
       { fontFamily: '"Press Start 2P"', fontSize: '18px', fill: '#FFF' });
 
     this.privKeyBtn = this.add.text(125, 350, `Login with Private Key`,
@@ -30,10 +32,10 @@ export class LoginScene extends Phaser.Scene {
     this.logoutButton = this.add.text(125, 375, logoutText,
       { fontFamily: '"Press Start 2P"', fontSize: '18px', fill: '#FFF' });
 
-    this.loginButton.setInteractive();
+    this.scatterBtn.setInteractive();
     //this.provider.events.once('loggedin', this.login, this);
-    this.loginButton.once('pointerdown', () => {
-      this.provider.login();
+    this.scatterBtn.once('pointerdown', () => {
+      this.setupAndLogin();
     }, this);
 
     this.logoutButton.setInteractive();
@@ -45,6 +47,12 @@ export class LoginScene extends Phaser.Scene {
     this.privKeyBtn.once('pointerdown', () => {
       this.scene.start('PrivKeyScene');
     });
+  }
+
+  setupAndLogin() {
+    this.provider = new ScatterProvider();
+    this.provider.setProvider(PROVIDERS.SCATTER);
+    this.provider.login();
   }
 
   login(account) {

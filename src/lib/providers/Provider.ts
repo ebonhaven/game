@@ -72,7 +72,6 @@ export abstract class Provider {
   }
 
   async move( account, data ) {
-    console.log('sending transaction');
     this.transact('move', account.auth, data, 'movesuccess', 'moveerror');
   }
 

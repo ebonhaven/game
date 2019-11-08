@@ -140,6 +140,10 @@ export class FieldScene extends Phaser.Scene {
     });
   }
 
+  longRun() {
+    
+  }
+
   update(time, delta): void {
     this.finder.calculate();
     this.controls.update(delta);
@@ -183,7 +187,7 @@ export class FieldScene extends Phaser.Scene {
           }
           this.currentPath = path;
           this.events.emit("pathfound");
-          console.log('pathfound');
+          // console.log('pathfound');
         }
       });
     }

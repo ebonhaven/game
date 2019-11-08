@@ -59,9 +59,9 @@ export class PrivKeyScene extends Phaser.Scene {
   }
 
   submit(privKey: string): void {
-    this.registry.set('provider', this.provider);
     this.provider.setProvider(PROVIDERS.DEFAULT);
     this.provider.setPrivateKey(privKey);
+    this.registry.set('provider', this.provider);
   }
 
   cancel(): void {

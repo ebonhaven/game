@@ -44,7 +44,7 @@ export class DefaultProvider extends Provider {
     };
     let merged = Object.assign(defaults, options);
     console.log('starting transaction')
-    await this.api.transact({
+    return this.api.transact({
       actions: [{
         account: "ebonhavencom",
         name: action,
@@ -59,11 +59,10 @@ export class DefaultProvider extends Provider {
         expireSeconds: merged.expireSeconds
       }
     ).then((result) => {
-      console.log('transaction complete');
       this.events.emit(successEvent);
-    }, (err) => {
+    }).catch((err) => {
       console.error(err);
-      this.events.emit(errorEvent)
+      this.events.emit(errorEvent);
     });
   }
 

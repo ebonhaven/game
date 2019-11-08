@@ -32,7 +32,7 @@ export class ScatterProvider extends Provider {
         ScatterJS.identity.accounts.forEach((a) => {
           console.log(a);
         });
-        super.events.emit('loggedin', acct);
+        this.events.emit('loggedin', acct);
       });
     });
   }
