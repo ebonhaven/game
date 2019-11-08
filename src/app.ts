@@ -5,13 +5,17 @@ import { NewCharacterScene } from "./scenes/NewCharacterScene";
 import { FieldScene } from "./scenes/FieldScene";
 import { GameScene } from "./scenes/GameScene";
 import { ScoreScene } from "./scenes/ScoreScene";
+import { PrivKeyScene } from './scenes/PrivKeyScene';
+
+const DEFAULT_WIDTH = 1280;
+const DEFAULT_HEIGHT = 720;
 
 const config: GameConfig = {
   title: "Ebonhaven",
-  width: 800,
-  height: 600,
+  width: DEFAULT_WIDTH,
+  height: DEFAULT_HEIGHT,
   parent: "game",
-  scene: [ LoginScene, CharacterSelectScene, NewCharacterScene, FieldScene, GameScene, ScoreScene ],
+  scene: [ LoginScene, CharacterSelectScene, NewCharacterScene, FieldScene, GameScene, ScoreScene, PrivKeyScene ],
   render: {
     pixelArt: true
   },
@@ -27,12 +31,6 @@ const config: GameConfig = {
   backgroundColor: "#000"
 };
 
-export class StarfallGame extends Phaser.Game {
-  constructor(config: GameConfig) {
-    super(config);
-  }
-};
-
-window.onload = () => {
-  var game = new StarfallGame(config);
-};
+window.addEventListener('load', () => {
+  let game = new Phaser.Game(config);
+});

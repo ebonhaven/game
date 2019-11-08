@@ -1,10 +1,10 @@
 import "phaser";
-import { Scatter } from '../lib/Scatter';
+import { ScatterProvider } from '../lib/providers/ScatterProvider';
 import { UIManager } from '../lib/UIManager';
 
 export class CharacterSelectScene extends Phaser.Scene {
   ui;
-  scatter;
+  provider;
   backButton;
   newCharacterButton;
   characters = [];
@@ -19,7 +19,7 @@ export class CharacterSelectScene extends Phaser.Scene {
 
   create(): void {
     this.ui = new UIManager();
-    this.scatter = Scatter.getInstance();
+    this.provider = this.registry.get('provider');
 
     var newCharacterText: string = "New Character";
     this.newCharacterButton = this.add.text(50, 250, newCharacterText,
@@ -38,11 +38,11 @@ export class CharacterSelectScene extends Phaser.Scene {
       this.goBack();
     }, this);
 
-    console.log(this.scatter);
+    console.log(this.provider);
 
     this.refreshUI();
 
-    this.scatter.events.once("characterdeleted", (result) => {
+    this.provider.events.once("characterdeleted", (result) => {
       console.log("Character deleted!");
       this.refreshUI();
     });
@@ -50,8 +50,9 @@ export class CharacterSelectScene extends Phaser.Scene {
 
   async refreshUI() {
     this.ui.clearCharacterList();
-    const accounts = await this.scatter.getAccount(this.registry.values.account.name);
-    const characters = await this.scatter.getCharacters(this.registry.values.account.name);
+    const accounts = await this.provider.getAccount(this.registry.values.account.name);
+    console.log(accounts);
+    const characters = await this.provider.getCharacters(this.registry.values.account.name);
     this.registry.set('characters', characters.rows);
     console.log(accounts);
     this.ui.renderCharacterList(this, characters.rows);

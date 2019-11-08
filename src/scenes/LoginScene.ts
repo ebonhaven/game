@@ -1,11 +1,12 @@
 import "phaser";
-import { Scatter } from '../lib/Scatter';
+import { Provider } from '../lib/providers/Provider';
 
 export class LoginScene extends Phaser.Scene {
   title: Phaser.GameObjects.Text;
   loginButton: Phaser.GameObjects.Text;
   logoutButton: Phaser.GameObjects.Text;
-  scatter;
+  privKeyBtn: Phaser.GameObjects.Text;
+  provider;
 
   constructor() {
     super({
@@ -15,31 +16,35 @@ export class LoginScene extends Phaser.Scene {
 
   create(): void {
 
-    this.scatter = Scatter.getInstance();
-
     console.log('creating login scene');
-    var titleText: string = "Ebonhaven";
-    this.title = this.add.text(125, 200, titleText,
+    this.title = this.add.text(125, 200, `Ebonhaven`,
       { fontFamily: '"Press Start 2P"', fontSize: '48px', fill: '#FFF' });
 
-    var loginText: string = "Login";
-    this.loginButton = this.add.text(300, 350, loginText,
-      { fontFamily: '"Press Start 2P"', fontSize: '24px', fill: '#FFF' });
+    this.loginButton = this.add.text(125, 325, `Login with Scatter`,
+      { fontFamily: '"Press Start 2P"', fontSize: '18px', fill: '#FFF' });
+
+    this.privKeyBtn = this.add.text(125, 350, `Login with Private Key`,
+      { fontFamily: '"Press Start 2P"', fontSize: '18px', fill: '#FFF' });
 
     var logoutText: string = "Logout";
-    this.logoutButton = this.add.text(300, 375, logoutText,
-      { fontFamily: '"Press Start 2P"', fontSize: '24px', fill: '#FFF' });
+    this.logoutButton = this.add.text(125, 375, logoutText,
+      { fontFamily: '"Press Start 2P"', fontSize: '18px', fill: '#FFF' });
 
     this.loginButton.setInteractive();
-    this.scatter.events.once('loggedin', this.login, this);
+    //this.provider.events.once('loggedin', this.login, this);
     this.loginButton.once('pointerdown', () => {
-      this.scatter.login();
+      this.provider.login();
     }, this);
 
     this.logoutButton.setInteractive();
     this.logoutButton.once('pointerdown', () => {
-      this.scatter.logout();
+      this.provider.logout();
     }, this);
+
+    this.privKeyBtn.setInteractive();
+    this.privKeyBtn.once('pointerdown', () => {
+      this.scene.start('PrivKeyScene');
+    });
   }
 
   login(account) {

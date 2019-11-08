@@ -1,3 +1,4 @@
+import { AccountListItem } from './ui/AccountListItem';
 import { CharacterListItem } from './ui/CharacterListItem';
 
 export class UIManager {
@@ -44,6 +45,20 @@ export class UIManager {
     });
   }
 
+  renderAccountsList(scene, data) {
+    let yPosStart = 100;
+    data.account_names.forEach((a, index) => {
+      let item = new AccountListItem();
+      item.selectHandle = scene.add.text(50, yPosStart, a, 
+        {fontFamily: '"Press Start 2P"', fontSize: '24px', fill: '#FFF' });
+      item.selectHandle.setInteractive();
+      item.selectHandle.on('pointerdown', () => {
+        scene.accountSelected(a);
+      });
+      yPosStart = yPosStart + 26;
+    });
+  }
+
   clearCharacterList() {
     this.characterList.forEach(i => { i.clear() });
     this.characterList = [];
@@ -56,7 +71,7 @@ export class UIManager {
       user: account.name,
       character_id: characterId
     };
-    scene.scatter.delCharacter( account, data );
+    scene.provider.delCharacter( account, data );
   }
 
 }

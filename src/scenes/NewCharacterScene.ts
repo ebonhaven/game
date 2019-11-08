@@ -1,8 +1,8 @@
 import "phaser";
-import { Scatter } from '../lib/Scatter';
+import { ScatterProvider } from '../lib/providers/ScatterProvider';
 
 export class NewCharacterScene extends Phaser.Scene {
-  scatter;
+  provider;
   characters;
 
   constructor() {
@@ -16,7 +16,7 @@ export class NewCharacterScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.scatter = Scatter.getInstance();
+    this.provider = this.registry.get('provider');
     let element = this.add.dom(400, 200).createFromCache("newcharacter");
     element.addListener('click');
     element.on('click', (evt) => {
@@ -30,11 +30,13 @@ export class NewCharacterScene extends Phaser.Scene {
           race: element.getChildByName("race")["value"],
           profession: element.getChildByName("profession")["value"]
         }
-        this.scatter.newCharacter( account, data );
+        console.log(account);
+        console.log(data);
+        this.provider.newCharacter( account, data );
       }
       console.log(evt);
     }, this);
-    this.scatter.events.on("charactercreated", () => {
+    this.provider.events.on("charactercreated", () => {
       this.refreshCharacters();
       console.log('Character Created!');
       this.goToCharacterSelect();
