@@ -6,6 +6,7 @@ import { FieldScene } from "./scenes/FieldScene";
 import { GameScene } from "./scenes/GameScene";
 import { ScoreScene } from "./scenes/ScoreScene";
 import { PrivKeyScene } from './scenes/PrivKeyScene';
+import { EncounterScene } from './scenes/EncounterScene';
 
 const DEFAULT_WIDTH = 1280;
 const DEFAULT_HEIGHT = 720;
@@ -15,7 +16,15 @@ const config: GameConfig = {
   width: DEFAULT_WIDTH,
   height: DEFAULT_HEIGHT,
   parent: "game",
-  scene: [ LoginScene, CharacterSelectScene, NewCharacterScene, FieldScene, GameScene, ScoreScene, PrivKeyScene ],
+  scene: [ 
+    LoginScene,
+    CharacterSelectScene,
+    NewCharacterScene,
+    FieldScene,
+    GameScene,
+    ScoreScene,
+    PrivKeyScene, 
+    EncounterScene ],
   render: {
     pixelArt: true
   },

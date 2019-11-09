@@ -52,7 +52,12 @@ export class LoginScene extends Phaser.Scene {
   setupAndLogin() {
     this.provider = new ScatterProvider();
     this.provider.setProvider(PROVIDERS.SCATTER);
+    this.registry.set('provider', this.provider);
     this.provider.login();
+    this.provider.events.on('loggedin', (account) => {
+      this.registry.set('account', account);
+      this.scene.start('CharacterSelectScene');
+    });
   }
 
   login(account) {

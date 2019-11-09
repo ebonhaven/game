@@ -29,6 +29,10 @@ export class ScatterProvider extends Provider {
         if (!id) return console.error('no identity');
         let acct = ScatterJS.account('eos');
         console.log(ScatterJS.identity);
+        acct.auth = {
+          name: acct.name,
+          authority: acct.authority
+        };
         ScatterJS.identity.accounts.forEach((a) => {
           console.log(a);
         });
@@ -37,7 +41,7 @@ export class ScatterProvider extends Provider {
     });
   }
 
-  transact( action, auth, data, options = {} ) {
+  transact( action, auth, data, successEvent, errorEvent, options = {} ) {
     let defaults = {
       blocksBehind: 3,
       expireSeconds: 30
@@ -60,8 +64,13 @@ export class ScatterProvider extends Provider {
       }, {
         blocksBehind: merged.blocksBehind,
         expireSeconds: merged.expireSeconds
-      });
-    });
+      }).then((result) => {
+        this.events.emit(successEvent);
+      }).catch((err) => {
+        console.error(err);
+        this.events.emit(errorEvent);
+      });;
+    })
   }
 
   logout() {
@@ -71,7 +80,7 @@ export class ScatterProvider extends Provider {
       const scatter = ScatterJS.scatter;
       scatter.forgetIdentity().then(() => {
         console.log('logged out');
-        super.events.emit('loggedout');
+        this.events.emit('loggedout');
       });
     });
   }

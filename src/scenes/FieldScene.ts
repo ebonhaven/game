@@ -133,15 +133,30 @@ export class FieldScene extends Phaser.Scene {
       this.sendMoveTx(this.currentPath[this.currentPath.length - 1]);
     });
 
+    this.events.on("newencounter", () => {
+      console.log('newencounter');
+      this.scene.start("EncounterScene");
+    });
+
     this.provider.events.on("movesuccess", (result) => {
       console.log("Move succeeded");
       this.moveCharacter(this.currentPath);
       this.currentPath = null;
+      this.refreshCharacter();
     });
   }
 
-  longRun() {
-    
+  async refreshCharacter() {
+    let idx = this.registry.get('activeCharacterIndex');
+    const characters = await this.provider.getCharacters(this.registry.values.account.name);
+    switch(characters.rows[idx].status) {
+      case 2:
+        console.log('gather');
+        break;
+      case 4:
+        this.events.emit("newencounter");
+        break;
+    }
   }
 
   update(time, delta): void {
